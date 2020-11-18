@@ -40,7 +40,7 @@ export type DataSourceProps = {
 
 type BrainzPlayerProps = {
   spotifyUser: SpotifyUser;
-  direction: BrainzPlayDirection;
+  direction?: BrainzPlayDirection;
   onCurrentListenChange: (listen: Listen) => void;
   currentListen?: Listen;
   listens: Array<Listen>;
