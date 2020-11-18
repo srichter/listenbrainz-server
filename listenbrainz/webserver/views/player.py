@@ -61,3 +61,30 @@ def load():
         props=ujson.dumps(props),
         user=current_user
     )
+
+
+@player_bp.route("/iframe")
+def iframe():
+    # An embedded brainzplayer with no playlist or listenbrainz chrome, to be embedded
+    # in an iframe
+
+    user_data = {}
+    spotify_data = {}
+    if current_user.is_authenticated:
+        user_data = {
+            "id": current_user.id,
+            "name": current_user.musicbrainz_id,
+            "auth_token": current_user.auth_token,
+        }
+        spotify_data = spotify.get_user_dict(current_user.id)
+    props = {
+        "user": user_data,
+        "spotify": spotify_data,
+        "api_url": current_app.config["API_URL"],
+    }
+
+    return render_template(
+        "player/iframe.html",
+        props=ujson.dumps(props),
+        user=current_user
+    )
