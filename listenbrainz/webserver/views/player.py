@@ -81,10 +81,8 @@ def iframe():
         "user": user_data,
         "spotify": spotify_data,
         "api_url": current_app.config["API_URL"],
-        "origin": request.environ.get('HTTP_ORIGIN', current_app.config["SERVER_ROOT_URL"])
+        "origin": request.headers["Host"]
     }
-    print(request.headers)
-    current_app.logger.info()
 
     return render_template(
         "player/iframe.html",
