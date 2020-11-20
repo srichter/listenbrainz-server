@@ -1,4 +1,5 @@
 import { AlertList } from "react-bs-notifier";
+import { parse } from "psl";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import BrainzPlayer from "./BrainzPlayer";
@@ -8,6 +9,7 @@ export interface RecentListensProps {
   apiUrl: string;
   listens?: Array<Listen>;
   spotify: SpotifyUser;
+  origin: string;
 }
 
 export interface RecentListensState {
@@ -35,8 +37,14 @@ export default class RecentListens extends React.Component<
     this.APIService = new APIService(
       props.apiUrl || `${window.location.origin}/1`
     );
-    // @ts-ignore
-    window.playListen = this.playListen;
+
+    /* Setting both the iframe and its parent to the same domain (without dubdomain)
+	allows us to sidestep iframe cross-origin restrictions
+	See: https://javascript.info/cross-window-communication#windows-on-subdomains-document-domain */
+    const parsedOrigin = parse(props.origin);
+    if (!parsedOrigin.error) {
+      document.domain = parsedOrigin.domain ?? document.domain;
+    }
   }
 
   playListen = (listen: Listen): void => {
@@ -126,10 +134,15 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (err) {
     // TODO: Show error to the user and ask to reload page
   }
-  const { api_url, listens, spotify } = reactProps;
+  const { api_url, listens, origin, spotify } = reactProps;
 
   ReactDOM.render(
-    <RecentListens apiUrl={api_url} listens={listens} spotify={spotify} />,
+    <RecentListens
+      apiUrl={api_url}
+      listens={listens}
+      origin={origin}
+      spotify={spotify}
+    />,
     domContainer
   );
 });
