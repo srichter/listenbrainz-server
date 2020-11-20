@@ -45,6 +45,8 @@ export default class RecentListens extends React.Component<
     if (!parsedOrigin.error) {
       document.domain = parsedOrigin.domain ?? document.domain;
     }
+    // @ts-ignore
+    window.playListen = this.playListen;
   }
 
   playListen = (listen: Listen): void => {

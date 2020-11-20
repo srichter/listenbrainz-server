@@ -83,6 +83,8 @@ def iframe():
         "api_url": current_app.config["API_URL"],
         "origin": request.environ.get('HTTP_ORIGIN', current_app.config["SERVER_ROOT_URL"])
     }
+    print(request.headers)
+    current_app.logger.info()
 
     return render_template(
         "player/iframe.html",
