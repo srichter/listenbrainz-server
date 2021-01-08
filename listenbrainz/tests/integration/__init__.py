@@ -2,16 +2,22 @@ import json
 import os
 import time
 
+import pytest
+
 import listenbrainz.db.user as db_user
 from flask import current_app, url_for
 
 from redis import Redis
 from listenbrainz.webserver.testing import ServerTestCase, APICompatServerTestCase
 from listenbrainz.db.testing import DatabaseTestCase, TimescaleTestCase
+from messybrainz.db.testing import MessybrainzDatabaseTestCase
 
 TIMESCALE_SQL_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', 'admin', 'timescale')
 
 
+# All tests that inherit from IntegrationTestCase are marked as as "integration tests",
+# that don't run by default and can be chosen with `pytest -m integration`
+@pytest.mark.integration
 class IntegrationTestCase(ServerTestCase, DatabaseTestCase):
 
     def setUp(self):
@@ -47,10 +53,11 @@ class IntegrationTestCase(ServerTestCase, DatabaseTestCase):
         return response
 
 
-class ListenAPIIntegrationTestCase(IntegrationTestCase, TimescaleTestCase):
+class ListenAPIIntegrationTestCase(IntegrationTestCase, TimescaleTestCase, MessybrainzDatabaseTestCase):
     def setUp(self):
         IntegrationTestCase.setUp(self)
         TimescaleTestCase.setUp(self)
+        MessybrainzDatabaseTestCase.setUp(self)
         self.user = db_user.get_or_create(1, 'testuserpleaseignore')
 
     def tearDown(self):
@@ -58,6 +65,7 @@ class ListenAPIIntegrationTestCase(IntegrationTestCase, TimescaleTestCase):
         r.flushall()
         IntegrationTestCase.tearDown(self)
         TimescaleTestCase.tearDown(self)
+        MessybrainzDatabaseTestCase.tearDown(self)
 
     def send_data(self, payload, user=None):
         """ Sends payload to api.submit_listen and return the response
@@ -72,6 +80,7 @@ class ListenAPIIntegrationTestCase(IntegrationTestCase, TimescaleTestCase):
         )
 
 
+@pytest.mark.integration
 class APICompatIntegrationTestCase(APICompatServerTestCase, DatabaseTestCase):
 
     def setUp(self):

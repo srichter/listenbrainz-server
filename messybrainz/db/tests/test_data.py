@@ -20,7 +20,7 @@ import json
 
 from messybrainz import db
 from messybrainz.db import data
-from messybrainz.db.testing import DatabaseTestCase
+from messybrainz.db.testing import MessybrainzDatabaseTestCase
 
 
 recording = {
@@ -41,7 +41,7 @@ recording_diff_case = {
     },
 }
 
-class DataTestCase(DatabaseTestCase):
+class DataTestCase(MessybrainzDatabaseTestCase):
 
     def test_get_id_from_meta_hash(self):
         with db.engine.connect() as connection:

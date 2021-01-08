@@ -71,7 +71,7 @@ def load_config(app):
         print('Unable to retrieve git commit. Error: %s', str(e))
 
 
-def gen_app(config_path=None, debug=None):
+def gen_app(debug=None):
     """ Generate a Flask app for LB with all configurations done and connections established.
 
     In the Flask app returned, blueprints are not registered.
@@ -144,9 +144,9 @@ def gen_app(config_path=None, debug=None):
     return app
 
 
-def create_app(config_path=None, debug=None):
+def create_app(debug=None):
 
-    app = gen_app(config_path=config_path, debug=debug)
+    app = gen_app(debug=debug)
 
     # Static files
     import listenbrainz.webserver.static_manager
@@ -189,14 +189,14 @@ def create_app(config_path=None, debug=None):
     return app
 
 
-def create_api_compat_app(config_path=None, debug=None):
+def create_api_compat_app(debug=None):
     """ Creates application for the AudioScrobbler API.
 
     The AudioScrobbler API v1.2 requires special views for the root URL so we
     need to create a different app and only register the api_compat blueprints
     """
 
-    app = gen_app(config_path=config_path, debug=debug)
+    app = gen_app(debug=debug)
 
     from listenbrainz.webserver.views.api_compat import api_bp as api_compat_bp
     from listenbrainz.webserver.views.api_compat_deprecated import api_compat_old_bp

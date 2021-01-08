@@ -4,7 +4,7 @@ import unittest
 from messybrainz import submit_listens_and_sing_me_a_sweet_song as submit_listens
 from messybrainz import db
 from messybrainz.db import data
-from messybrainz.db.testing import DatabaseTestCase
+from messybrainz.db.testing import MessybrainzDatabaseTestCase
 from messybrainz.db import release
 from messybrainz.db.release import fetch_unclustered_distinct_release_mbids,\
                                     fetch_unclustered_gids_for_release_mbid,\
@@ -23,7 +23,7 @@ from unittest.mock import patch
 from uuid import UUID
 
 
-class ReleaseTestCase(DatabaseTestCase):
+class ReleaseTestCase(MessybrainzDatabaseTestCase):
     def _load_test_data(self, filename):
         """Loads data for tests from a given JSON file name."""
 

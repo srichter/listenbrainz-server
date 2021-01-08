@@ -7,7 +7,6 @@ import listenbrainz.db.user as db_user
 from listenbrainz.tests.integration import ListenAPIIntegrationTestCase
 from listenbrainz.webserver.views.api_tools import is_valid_uuid
 
-
 class APITestCase(ListenAPIIntegrationTestCase):
 
     def test_get_listens_invalid_count(self):

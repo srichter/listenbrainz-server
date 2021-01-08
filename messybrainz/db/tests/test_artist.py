@@ -2,7 +2,7 @@ from messybrainz import data
 from messybrainz import db
 from messybrainz import submit_listens_and_sing_me_a_sweet_song as submit_listens
 from messybrainz.db import artist
-from messybrainz.db.testing import DatabaseTestCase
+from messybrainz.db.testing import MessybrainzDatabaseTestCase
 from unittest.mock import patch
 from uuid import UUID
 
@@ -10,7 +10,7 @@ import json
 import unittest
 
 
-class ArtistTestCase(DatabaseTestCase):
+class ArtistTestCase(MessybrainzDatabaseTestCase):
 
     def _load_test_data(self, filename):
         """Loads data for tests from a given JSON file name."""

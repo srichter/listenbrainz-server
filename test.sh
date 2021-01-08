@@ -26,16 +26,6 @@ COMPOSE_PROJECT_NAME_ORIGINAL=listenbrainz_test
 SPARK_COMPOSE_FILE_LOC=docker/docker-compose.spark.test.yml
 SPARK_COMPOSE_PROJECT_NAME_ORIGINAL=listenbrainz_spark_test
 
-INT_COMPOSE_FILE_LOC=docker/docker-compose.integration.yml
-INT_COMPOSE_PROJECT_NAME_ORIGINAL=listenbrainz_int
-
-#docker-compose -f $COMPOSE_FILE_LOC -p $COMPOSE_PROJECT_NAME build
-#    docker ps -a --no-trunc  | grep $COMPOSE_PROJECT_NAME \
-#        | awk '{print $1}' | xargs -r --no-run-if-empty docker stop
-#    docker ps -a --no-trunc  | grep $COMPOSE_PROJECT_NAME \
-#        | awk '{print $1}' | xargs -r --no-run-if-empty docker rm
-
-
 if [[ ! -d "docker" ]]; then
     echo "This script must be run from the top level directory of the listenbrainz-server source."
     exit -1
@@ -44,13 +34,13 @@ fi
 function build_unit_containers {
     docker-compose -f $COMPOSE_FILE_LOC \
                    -p $COMPOSE_PROJECT_NAME \
-                build db timescale redis rabbitmq listenbrainz
+                build db timescale redis rabbitmq listenbrainz timescale_writer
 }
 
 function bring_up_unit_db {
     docker-compose -f $COMPOSE_FILE_LOC \
                    -p $COMPOSE_PROJECT_NAME \
-                up -d db timescale redis rabbitmq
+                up -d db timescale redis rabbitmq timescale_writer
 }
 
 function unit_setup {
@@ -90,26 +80,26 @@ function is_unit_db_exists {
 
 function unit_stop {
     # Stopping all unit test containers associated with this project
-    docker-compose -f $COMPOSE_FILE_LOC \
+    exec docker-compose -f $COMPOSE_FILE_LOC \
                    -p $COMPOSE_PROJECT_NAME \
                 stop
 }
 
 function unit_dcdown {
     # Shutting down all unit test containers associated with this project
-    docker-compose -f $COMPOSE_FILE_LOC \
+    exec docker-compose -f $COMPOSE_FILE_LOC \
                    -p $COMPOSE_PROJECT_NAME \
                 down
 }
 
 function build_frontend_containers {
-    docker-compose -f $COMPOSE_FILE_LOC \
+    exec docker-compose -f $COMPOSE_FILE_LOC \
                    -p $COMPOSE_PROJECT_NAME \
                 build listenbrainz frontend_tester
 }
 
 function update_snapshots {
-    docker-compose -f $COMPOSE_FILE_LOC \
+    exec docker-compose -f $COMPOSE_FILE_LOC \
                    -p $COMPOSE_PROJECT_NAME \
                 run --rm frontend_tester npm run test:update-snapshots
 }
@@ -135,31 +125,6 @@ function spark_dcdown {
     docker-compose -f $SPARK_COMPOSE_FILE_LOC \
                    -p $SPARK_COMPOSE_PROJECT_NAME \
                 down
-}
-
-function int_build {
-    docker-compose -f $INT_COMPOSE_FILE_LOC \
-                   -p $INT_COMPOSE_PROJECT_NAME \
-                build
-}
-
-function int_dcdown {
-    # Shutting down all integration test containers associated with this project
-    docker-compose -f $INT_COMPOSE_FILE_LOC \
-                   -p $INT_COMPOSE_PROJECT_NAME \
-                down
-}
-
-function int_setup {
-    echo "Running setup"
-    docker-compose -f $INT_COMPOSE_FILE_LOC \
-                   -p $INT_COMPOSE_PROJECT_NAME \
-                run --rm listenbrainz dockerize \
-                  -wait tcp://db:5432 -timeout 60s \
-                  -wait tcp://timescale:5432 -timeout 60s \
-                bash -c "python3 manage.py init_db --create-db && \
-                         python3 manage.py init_msb_db --create-db && \
-                         python3 manage.py init_ts_db --create-db"
 }
 
 function bring_up_int_containers {
@@ -188,41 +153,14 @@ if [ "$1" == "spark" ]; then
     exit 0
 fi
 
-if [ "$1" == "int" ]; then
-    # Project name is sanitized by Compose, so we need to do the same thing.
-    # See https://github.com/docker/compose/issues/2119.
-    INT_COMPOSE_PROJECT_NAME=$(echo $INT_COMPOSE_PROJECT_NAME_ORIGINAL | awk '{print tolower($0)}' | sed 's/[^a-z0-9]*//g')
-    INT_TEST_CONTAINER_NAME=listenbrainz
-    TEST_CONTAINER_REF="${INT_COMPOSE_PROJECT_NAME}_${INT_TEST_CONTAINER_NAME}_1"
-
-    echo "Taking down old containers"
-    int_dcdown
-    echo "Building current setup"
-    int_build
-    echo "Building containers"
-    int_setup
-    echo "Bringing containers up"
-    bring_up_int_containers
-    shift
-    if [ -z "$@" ]; then
-        TESTS_TO_RUN="listenbrainz/tests/integration"
-    else
-        TESTS_TO_RUN="$@"
-    fi
-    echo "Running tests $TESTS_TO_RUN"
-
-    docker-compose -f $INT_COMPOSE_FILE_LOC \
-                   -p $INT_COMPOSE_PROJECT_NAME \
-                run --rm listenbrainz dockerize \
-                  -wait tcp://db:5432 -timeout 60s \
-                  -wait tcp://timescale:5432 -timeout 60s \
-                  -wait tcp://redis:6379 -timeout 60s \
-                  -wait tcp://rabbitmq:5672 -timeout 60s \
-                bash -c "py.test $TESTS_TO_RUN"
-    echo "Taking containers down"
-    int_dcdown
-    exit 0
-fi
+#    docker-compose -f $INT_COMPOSE_FILE_LOC \
+#                   -p $INT_COMPOSE_PROJECT_NAME \
+#                run --rm listenbrainz dockerize \
+#                  -wait tcp://db:5432 -timeout 60s \
+#                  -wait tcp://timescale:5432 -timeout 60s \
+#                  -wait tcp://redis:6379 -timeout 60s \
+#                  -wait tcp://rabbitmq:5672 -timeout 60s \
+#                bash -c "py.test $TESTS_TO_RUN"
 
 # Project name is sanitized by Compose, so we need to do the same thing.
 # See https://github.com/docker/compose/issues/2119.
@@ -298,12 +236,12 @@ if [ $DB_EXISTS -eq 1 -a $DB_RUNNING -eq 1 ]; then
     echo "Running tests"
     docker-compose -f $COMPOSE_FILE_LOC \
                    -p $COMPOSE_PROJECT_NAME \
-                run --rm listenbrainz py.test "$@"
+                run --rm listenbrainz pytest "$@"
     unit_dcdown
 else
     # Else, we have containers, just run tests
     echo "Running tests"
     docker-compose -f $COMPOSE_FILE_LOC \
                    -p $COMPOSE_PROJECT_NAME \
-                run --rm listenbrainz py.test "$@"
+                run --rm listenbrainz bash #pytest "$@"
 fi
