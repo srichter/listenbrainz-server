@@ -6,6 +6,11 @@ declare module "time-ago";
 declare module "debounce-async";
 
 declare module "react-bs-notifier";
+
+declare type GlobalProps = {
+  api_url: string;
+};
+
 declare type AlertType = "danger" | "warning" | "success";
 declare type Alert = {
   id: number;

@@ -26,7 +26,6 @@ const listen: Listen = {
 };
 
 const props: ListenCardProps = {
-  apiUrl: "foobar",
   listen,
   mode: "listens",
   currentFeedback: 1,

@@ -10,7 +10,12 @@ import {
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { getArtistLink, getTrackLink, preciseTimestamp } from "../utils";
+import {
+  getArtistLink,
+  getTrackLink,
+  GlobalPropsContext,
+  preciseTimestamp,
+} from "../utils";
 import Card from "../components/Card";
 import APIService from "../APIService";
 import ListenControl from "./ListenControl";
@@ -18,7 +23,6 @@ import ListenControl from "./ListenControl";
 export const DEFAULT_COVER_ART_URL = "/static/img/default_cover_art.png";
 
 export type ListenCardProps = {
-  apiUrl: string;
   listen: Listen;
   mode: ListensListMode;
   className?: string;
@@ -55,9 +59,8 @@ export default class ListenCard extends React.Component<
       feedback: props.currentFeedback || 0,
     };
 
-    this.APIService = new APIService(
-      props.apiUrl || `${window.location.origin}/1`
-    );
+    const { api_url } = this.context;
+    this.APIService = new APIService(api_url);
 
     this.playListen = props.playListen.bind(this, props.listen);
   }
@@ -332,3 +335,4 @@ export default class ListenCard extends React.Component<
     );
   }
 }
+ListenCard.contextType = GlobalPropsContext;

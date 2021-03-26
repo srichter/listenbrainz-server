@@ -205,6 +205,13 @@ const preciseTimestamp = (listened_at: number | string): string => {
   return `${timeago.ago(listened_at)}`;
 };
 
+const createGlobalPropContext = (): GlobalProps => {
+  const propsElement = document.getElementById("global-react-props");
+  return JSON.parse(propsElement!.innerHTML) as GlobalProps;
+};
+
+const GlobalPropsContext = React.createContext(createGlobalPropContext());
+
 export {
   searchForSpotifyTrack,
   getArtistLink,
@@ -212,4 +219,5 @@ export {
   getPlayButton,
   formatWSMessageToListen,
   preciseTimestamp,
+  GlobalPropsContext,
 };

@@ -9,10 +9,9 @@ import BrainzPlayer from "./BrainzPlayer";
 import APIService from "./APIService";
 import Loader from "./components/Loader";
 import ListenCard from "./listens/ListenCard";
-import { formatWSMessageToListen } from "./utils";
+import { formatWSMessageToListen, GlobalPropsContext } from "./utils";
 
 export interface RecentListensProps {
-  apiUrl: string;
   latestListenTs: number;
   latestSpotifyUri?: string;
   listens?: Array<Listen>;
@@ -70,9 +69,8 @@ export default class RecentListens extends React.Component<
       recordingFeedbackMap: {},
     };
 
-    this.APIService = new APIService(
-      props.apiUrl || `${window.location.origin}/1`
-    );
+    const { api_url } = this.context;
+    this.APIService = new APIService(api_url);
 
     this.listensTable = React.createRef();
   }
@@ -562,7 +560,6 @@ export default class RecentListens extends React.Component<
       oldestListenTs,
       spotify,
       user,
-      apiUrl,
       currentUser,
     } = this.props;
 
@@ -623,7 +620,6 @@ export default class RecentListens extends React.Component<
                           key={`${listen.listened_at}-${listen.track_metadata?.track_name}-${listen.track_metadata?.additional_info?.recording_msid}-${listen.user_name}`}
                           currentUser={currentUser}
                           isCurrentUser={currentUser?.name === user?.name}
-                          apiUrl={apiUrl}
                           listen={listen}
                           mode={mode}
                           currentFeedback={this.getFeedbackForRecordingMsid(
@@ -768,7 +764,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // TODO: Show error to the user and ask to reload page
   }
   const {
-    api_url,
     latest_listen_ts,
     latest_spotify_uri,
     listens,
@@ -784,7 +779,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   ReactDOM.render(
     <RecentListens
-      apiUrl={api_url}
       latestListenTs={latest_listen_ts}
       latestSpotifyUri={latest_spotify_uri}
       listens={listens}
@@ -800,3 +794,4 @@ document.addEventListener("DOMContentLoaded", () => {
     domContainer
   );
 });
+RecentListens.contextType = GlobalPropsContext;
