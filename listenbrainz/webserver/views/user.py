@@ -142,7 +142,6 @@ def profile(user_name):
         "mode": "listens",
         "spotify": spotify_data,
         "web_sockets_server_url": current_app.config['WEBSOCKETS_SERVER_URL'],
-        "api_url": current_app.config['API_URL'],
         "logged_in_user_follows_user": logged_in_user_follows_user,
     }
 
@@ -182,7 +181,6 @@ def charts(user_name):
 
     props = {
         "user": user_data,
-        "api_url": current_app.config["API_URL"]
     }
 
     return render_template(
@@ -205,7 +203,6 @@ def reports(user_name: str):
 
     props = {
         "user": user_data,
-        "api_url": current_app.config["API_URL"]
     }
 
     return render_template(
@@ -258,7 +255,6 @@ def playlists(user_name: str):
 
     props = {
         "current_user": current_user_data,
-        "api_url": current_app.config["API_URL"],
         "playlists": playlists,
         "user": user_data,
         "active_section": "playlists",
@@ -316,7 +312,6 @@ def recommendation_playlists(user_name: str):
 
     props = {
         "current_user": current_user_data,
-        "api_url": current_app.config["API_URL"],
         "playlists": playlists,
         "user": user_data,
         "active_section": "recommendations",
@@ -373,7 +368,6 @@ def collaborations(user_name: str):
 
     props = {
         "current_user": current_user_data,
-        "api_url": current_app.config["API_URL"],
         "playlists": playlists,
         "user": user_data,
         "active_section": "collaborations",

@@ -58,7 +58,6 @@ def load():
         },
         "current_user": current_user_data,
         "spotify": spotify_data,
-        "api_url": current_app.config["API_URL"],
         "recommendations": listens
     }
 

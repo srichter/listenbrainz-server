@@ -154,7 +154,6 @@ def recent_listens():
         "listens": recent,
         "mode": "recent",
         "spotify": spotify_user,
-        "api_url": current_app.config["API_URL"],
     }
 
     return render_template("index/recent.html",
@@ -179,7 +178,6 @@ def feed():
     props = {
         "current_user": current_user_data,
         "spotify": spotify_user,
-        "api_url": current_app.config["API_URL"],
     }
     return render_template('index/feed.html', props=ujson.dumps(props))
 
