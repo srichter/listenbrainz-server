@@ -114,7 +114,7 @@ def create_user_notification_event(user_name):
 
         {
             "metadata": {
-                "message": <the message to post, required>,
+                "message": "<the message to post, required>",
             }
         }
 
