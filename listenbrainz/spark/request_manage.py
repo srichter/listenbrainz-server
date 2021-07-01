@@ -270,6 +270,23 @@ def request_similar_users(max_num_users):
         'similarity.similar_users', params=params))
 
 
+@cli.command(name='request_similar_users_artist')
+@click.option("--max-num-users", type=int, default=25, help="The maxiumum number of similar users to return for any given user.")
+@click.option("--days", type=int, default=180, help="Request model to be trained on data of given number of days")
+@click.option("--listens-threshold", type=int, default=0, help="The minimum number of listens a user should have to be included in the dataframes.")
+def request_similar_users_artist(max_num_users, days, listens_threshold):
+    """ Send the cluster a request to generate similar users using artist listen counts.
+    """
+    params = {
+        'train_model_window': days,
+        'minimum_listens_threshold': listens_threshold,
+        'max_num_users': max_num_users
+    }
+    send_request_to_spark_cluster(
+        _prepare_query_message('similarity.similar_users_artist', params=params)
+    )
+
+
 # Some useful commands to keep our crontabs manageable. These commands do not add new functionality
 # rather combine multiple commands related to a task so that they are always invoked in the correct order.
 
@@ -311,7 +328,7 @@ def cron_request_similar_users(ctx):
 
 @cli.command(name='cron_request_recommendations')
 @click.pass_context
-def cron_request_similar_users(ctx):
+def cron_request_recommendations(ctx):
     ctx.invoke(request_dataframes)
     ctx.invoke(request_model)
     ctx.invoke(request_candidate_sets)
