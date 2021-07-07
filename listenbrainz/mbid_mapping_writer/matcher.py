@@ -11,6 +11,7 @@ from listenbrainz.db import timescale
 MAX_THREADS = 2
 MAX_QUEUED_JOBS = MAX_THREADS * 2
 SEARCH_TIMEOUT = 3600  # basically, don't have searches timeout.
+DEADLOCK_MAX_RETRIES = 5
 
 
 def process_listens(app, listens, is_legacy_listen=False):
@@ -48,40 +49,51 @@ def process_listens(app, listens, is_legacy_listen=False):
 
         conn = timescale.engine.raw_connection()
         with conn.cursor() as curs:
-            try:
-                # Try an exact lookup (in postgres) first.
-                matches, remaining_listens, stats = lookup_listens(
-                    app, list(msids.values()), stats, True)
+            for deadlock_count in range(DEADLOCK_MAX_RETRIES):
+                try:
+                    # Try an exact lookup (in postgres) first.
+                    matches, remaining_listens, stats = lookup_listens(
+                        app, list(msids.values()), stats, True)
 
-                # For all remaining listens, do a fuzzy lookup.
-                if remaining_listens:
-                    new_matches, remaining_listens, stats = lookup_listens(
-                        app, remaining_listens, stats, False)
-                    matches.extend(new_matches)
+                    # For all remaining listens, do a fuzzy lookup.
+                    if remaining_listens:
+                        new_matches, remaining_listens, stats = lookup_listens(
+                            app, remaining_listens, stats, False)
+                        matches.extend(new_matches)
 
-                    # For all listens that are not matched, enter a no match entry, so we don't 
-                    # keep attempting to look up more listens.
-                    for listen in remaining_listens:
-                        matches.append(
-                            (listen['recording_msid'], None, None, None, None, None, MATCH_TYPES[0]))
-                        stats['no_match'] += 1
+                        # For all listens that are not matched, enter a no match entry, so we don't 
+                        # keep attempting to look up more listens.
+                        for listen in remaining_listens:
+                            matches.append(
+                                (listen['recording_msid'], None, None, None, None, None, MATCH_TYPES[0]))
+                            stats['no_match'] += 1
 
-                stats["processed"] += len(matches)
-                if is_legacy_listen:
-                    stats["legacy_match"] += len(matches)
+                    stats["processed"] += len(matches)
+                    if is_legacy_listen:
+                        stats["legacy_match"] += len(matches)
 
-                # Finally insert matches to PG
-                query = """INSERT INTO listen_mbid_mapping (recording_msid, recording_mbid, release_mbid, artist_credit_id,
-                                                            artist_credit_name, recording_name, match_type)
-                                VALUES %s
-                           ON CONFLICT DO NOTHING"""
-                execute_values(curs, query, matches, template=None)
+                    # Finally insert matches to PG
+                    query = """INSERT INTO listen_mbid_mapping (recording_msid, recording_mbid, release_mbid, artist_credit_id,
+                                                                artist_credit_name, recording_name, match_type)
+                                    VALUES %s
+                               ON CONFLICT DO NOTHING"""
+                    execute_values(curs, query, matches, template=None)
 
-            except psycopg2.OperationalError as err:
-                app.logger.info(
-                    "Cannot insert MBID mapping rows. (%s)" % str(err))
+                except psycopg2.DeadlockDetected as err:
+                    app.logger.warning("Deadlock detected, retrying.")
+                    continue
+
+                except psycopg2.OperationalError as err:
+                    app.logger.info(
+                        "Cannot insert MBID mapping rows. (%s)" % str(err))
+                    conn.rollback()
+                    return stats
+
+                break
+            else:
+                app.logger.error("Deadlock retries failed. Dropping matches, will retry tomorrow.")
                 conn.rollback()
-                return
+                return stats
 
         conn.commit()
 
@@ -104,8 +116,12 @@ def lookup_listens(app, listens, stats, exact):
 
     params = []
     for listen in listens:
-        params.append({'[artist_credit_name]': listen["data"]["artist_name"],
-                       '[recording_name]': listen["data"]["track_name"]})
+        if listen["data"]["artist_name"] and listen["data"]["track_name"]:
+            params.append({'[artist_credit_name]': listen["data"]["artist_name"],
+                           '[recording_name]': listen["data"]["track_name"]})
+
+    if len(params) == 0:
+        return ([], [], stats)
 
     rows = []
     hits = q.fetch(params)
