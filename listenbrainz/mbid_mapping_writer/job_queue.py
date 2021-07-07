@@ -248,7 +248,7 @@ class MappingJobQueue(threading.Thread):
                                 self.app.logger.error(f.read())
                                 stats["errors"] += 1
                             else:
-                                job_stats = complete.result()
+                                job_stats = complete.result() or []
                                 for stat in job_stats:
                                     stats[stat] += job_stats[stat]
                             del futures[complete]
