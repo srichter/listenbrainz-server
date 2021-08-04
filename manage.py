@@ -2,6 +2,7 @@ from datetime import datetime
 
 import listenbrainz.db.dump_manager as dump_manager
 import listenbrainz.spark.request_manage as spark_request_manage
+from listenbrainz.listenstore import timescale_fill_userid
 from listenbrainz.listenstore.timescale_utils import recalculate_all_user_data as ts_recalculate_all_user_data, \
                                                      refresh_listen_count_aggregate as ts_refresh_listen_count_aggregate
 from listenbrainz import db
@@ -14,6 +15,8 @@ import sqlalchemy
 from time import sleep
 
 from listenbrainz.utils import safely_import_config
+from listenbrainz.webserver import create_app
+
 safely_import_config()
 
 
@@ -282,6 +285,16 @@ def refresh_continuous_aggregates():
         Update the continuous aggregates in timescale.
     """
     ts_refresh_listen_count_aggregate()
+
+
+@cli.command()
+def listen_add_userid():
+    """
+        Fill in the listen.user_id field based on user_name.
+    """
+    app = create_app()
+    with app.app_context():
+        timescale_fill_userid.fill_userid()
 
 
 # Add other commands here
