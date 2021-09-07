@@ -177,7 +177,10 @@ element                 description
 ``isrc``                The ISRC code associated with the recording.
 ``spotify_id``          The Spotify track URL associated with this recording.  e.g.: http://open.spotify.com/track/1rrgWMXGCGHru5bIRxGFV0
 ``tags``                A list of user defined tags to be associated with this recording. These tags are similar to last.fm tags. For example, you have apply tags such as ``punk``, ``see-live``, ``smelly``. You may submit up to :data:`~webserver.views.api.MAX_TAGS_PER_LISTEN` tags and each tag may be up to :data:`~webserver.views.api.MAX_TAG_SIZE` characters large.
-``listening_from``       The source of the listen, i.e the name of the client or service which submits the listen.
+``listening_from``      The name of the client which submits the listen.
+``listening_from_version`` (optional). If the client submitting the listen has a version, put it here.
+``source``              If the song of this listen comes from an online source, the name of this source (e.g. Spotify, Soundcloud, YouTube, Jamendo). This should be a name, not a URL.
+``origin_url``          If the song of this listen comes from an online source, the URL to the place where it is available. This could be a spotify url (see ``spotify_id``), a YouTube video URL, a Soundcloud recording page URL, or the full URL to a public MP3 file.
 ======================= ===========================================================================================================================================================================================================================================================================================================================================================================================================
 
 At this point, we are not scrubbing any superflous elements that may be
