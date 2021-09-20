@@ -65,6 +65,7 @@ module.exports = function (env, argv) {
         jsDir,
         "src/recommendations/Recommendations.tsx"
       ),
+      siteReports: path.resolve(jsDir, "src/stats/SiteReports.tsx"),
     },
     output: {
       filename: isProd ? "[name].[contenthash].js" : "[name].js",

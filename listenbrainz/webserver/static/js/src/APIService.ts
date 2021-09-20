@@ -362,6 +362,17 @@ export default class APIService {
     return response.status; // Return true if timestamp is updated
   };
 
+  checkStatsResponse = async (response: Response): Promise<void> => {
+      await this.checkStatus(response);
+      // if response code is 204, then statistics havent been calculated, send empty object
+      if (response.status === 204) {
+        const error = new APIError(`HTTP Error ${response.statusText}`);
+        error.status = response.statusText;
+        error.response = response;
+        throw error;
+      }
+  };
+
   getUserEntity = async (
     userName: string,
     entity: Entity,
@@ -374,14 +385,22 @@ export default class APIService {
       url += `&count=${count}`;
     }
     const response = await fetch(url);
-    await this.checkStatus(response);
-    // if response code is 204, then statistics havent been calculated, send empty object
-    if (response.status === 204) {
-      const error = new APIError(`HTTP Error ${response.statusText}`);
-      error.status = response.statusText;
-      error.response = response;
-      throw error;
+    await this.checkStatsResponse(response);
+    return response.json();
+  };
+
+  getSitewideEntity = async (
+    entity: Entity,
+    range: UserStatsAPIRange = "all_time",
+    offset: number = 0,
+    count?: number
+  ): Promise<UserEntityResponse> => {
+    let url = `${this.APIBaseURI}/stats/sitewide/${entity}s?offset=${offset}&range=${range}`;
+    if (count !== null && count !== undefined) {
+      url += `&count=${count}`;
     }
+    const response = await fetch(url);
+    await this.checkStatsResponse(response);
     return response.json();
   };
 

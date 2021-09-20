@@ -217,7 +217,7 @@ declare type UserArtistsResponse = {
     offset: number;
     range: UserStatsAPIRange;
     total_artist_count: number;
-    user_id: string;
+    user_id?: string;
     from_ts: number;
     to_ts: number;
   };
