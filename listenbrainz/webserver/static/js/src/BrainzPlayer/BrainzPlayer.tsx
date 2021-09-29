@@ -11,11 +11,11 @@ import * as _ from "lodash";
 import { faPlayCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import PlaybackControls from "../PlaybackControls";
-import GlobalAppContext from "../GlobalAppContext";
-import SpotifyPlayer from "../SpotifyPlayer";
+import PlaybackControls from "./PlaybackControls";
+import SpotifyPlayer from "./SpotifyPlayer";
 import YoutubePlayer from "./YoutubePlayer";
-import SoundcloudPlayer from "../SoundcloudPlayer";
+import SoundcloudPlayer from "./SoundcloudPlayer";
+import GlobalAppContext from "../GlobalAppContext";
 import {
   hasNotificationPermission,
   createNotification,

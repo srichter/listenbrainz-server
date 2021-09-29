@@ -73,6 +73,9 @@ const searchForYoutubeTrack = async (
   // if (releaseName) {
   //   query += ` ${releaseName}`;
   // }
+  if (!query) {
+    return null;
+  }
   const response = await fetch(
     `https://youtube.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
       query
