@@ -12,7 +12,7 @@ import {
 } from "./AlertNotificationsHOC";
 
 import APIServiceClass from "./APIService";
-import BrainzPlayer from "./BrainzPlayer";
+import BrainzPlayer from "./BrainzPlayer/BrainzPlayer";
 import Loader from "./components/Loader";
 import PinnedRecordingCard from "./PinnedRecordingCard";
 import { getPageProps, getListenablePin } from "./utils";

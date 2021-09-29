@@ -4,8 +4,8 @@ import BrainzPlayer, { DataSourceType } from "./BrainzPlayer";
 import SoundcloudPlayer from "./SoundcloudPlayer";
 import YoutubePlayer from "./YoutubePlayer";
 import SpotifyPlayer from "./SpotifyPlayer";
-import APIService from "./APIService";
-import GlobalAppContext from "./GlobalAppContext";
+import APIService from "../APIService";
+import GlobalAppContext from "../GlobalAppContext";
 
 const props = {
   direction: "up" as BrainzPlayDirection,

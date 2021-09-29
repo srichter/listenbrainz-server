@@ -7,7 +7,7 @@ import {
   isString as _isString,
 } from "lodash";
 import { DataSourceType, DataSourceProps } from "./BrainzPlayer";
-import { searchForYoutubeTrack } from "./utils";
+import { searchForYoutubeTrack } from "../utils";
 
 type YoutubePlayerState = {
   currentListen?: Listen;

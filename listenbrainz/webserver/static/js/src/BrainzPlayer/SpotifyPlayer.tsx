@@ -7,7 +7,7 @@ import {
   debounce as _debounce,
   isString,
 } from "lodash";
-import { searchForSpotifyTrack, loadScriptAsync } from "./utils";
+import { searchForSpotifyTrack, loadScriptAsync } from "../utils";
 import { DataSourceType, DataSourceProps } from "./BrainzPlayer";
 
 const getSpotifyUriFromListen = (listen: Listen): string => {
