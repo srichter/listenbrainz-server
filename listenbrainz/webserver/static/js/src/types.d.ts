@@ -204,6 +204,16 @@ declare type LastFmScrobblePage = {
   };
 };
 
+declare type UserStatsResponsePayloadBase = {
+  count: number;
+  last_updated: number;
+  offset: number;
+  range: UserStatsAPIRange;
+  user_id?: string; // For sitewide statistics, there will be no user_id field
+  from_ts: number;
+  to_ts: number;
+};
+
 declare type UserArtistsResponse = {
   payload: {
     artists: Array<{
@@ -212,15 +222,8 @@ declare type UserArtistsResponse = {
       artist_name: string;
       listen_count: number;
     }>;
-    count: number;
-    last_updated: number;
-    offset: number;
-    range: UserStatsAPIRange;
     total_artist_count: number;
-    user_id?: string;
-    from_ts: number;
-    to_ts: number;
-  };
+  } & UserStatsResponsePayloadBase;
 };
 
 declare type UserReleasesResponse = {
@@ -234,15 +237,8 @@ declare type UserReleasesResponse = {
       release_name: string;
       listen_count: number;
     }>;
-    count: number;
-    last_updated: number;
-    offset: number;
-    range: UserStatsAPIRange;
     total_release_count: number;
-    user_id: string;
-    from_ts: number;
-    to_ts: number;
-  };
+  } & UserStatsResponsePayloadBase;
 };
 
 declare type UserRecordingsResponse = {
@@ -259,15 +255,8 @@ declare type UserRecordingsResponse = {
       recording_msid?: string;
       listen_count: number;
     }>;
-    count: number;
-    last_updated: number;
-    offset: number;
-    range: UserStatsAPIRange;
     total_recording_count: number;
-    user_id: string;
-    from_ts: number;
-    to_ts: number;
-  };
+  } & UserStatsResponsePayloadBase;
 };
 
 declare type UserEntityResponse =
@@ -296,18 +285,13 @@ declare type Entity = "artist" | "release" | "recording";
 
 declare type UserListeningActivityResponse = {
   payload: {
-    from_ts: number;
-    to_ts: number;
-    last_updated: number;
-    user_id: string;
-    range: UserStatsAPIRange;
     listening_activity: Array<{
       from_ts: number;
       to_ts: number;
       time_range: string;
       listen_count: number;
     }>;
-  };
+  } & UserStatsResponsePayloadBase;
 };
 
 declare type UserListeningActivityDatum = {
@@ -329,33 +313,23 @@ declare type UserDailyActivityData = Array<UserDailyActivityDatum>;
 
 declare type UserDailyActivityResponse = {
   payload: {
-    from_ts: number;
-    to_ts: number;
-    last_updated: number;
-    user_id: string;
-    range: UserStatsAPIRange;
     daily_activity: {
       [day: string]: Array<{
         hour: number;
         listen_count: number;
       }>;
     };
-  };
+  } & UserStatsResponsePayloadBase;
 };
 
 declare type UserArtistMapResponse = {
   payload: {
-    from_ts: number;
-    to_ts: number;
-    last_updated: number;
-    user_id: string;
-    range: UserStatsAPIRange;
     artist_map: Array<{
       country: string;
       artist_count: number;
       listen_count: number;
     }>;
-  };
+  } & UserStatsResponsePayloadBase;
 };
 
 declare type UserArtistMapDatum = {
