@@ -380,6 +380,9 @@ export default class APIService {
     offset: number = 0,
     count?: number
   ): Promise<UserEntityResponse> => {
+    if (!userName) {
+      return this.getSitewideEntity(entity, range, offset, count);
+    }
     let url = `${this.APIBaseURI}/stats/user/${userName}/${entity}s?offset=${offset}&range=${range}`;
     if (count !== null && count !== undefined) {
       url += `&count=${count}`;
