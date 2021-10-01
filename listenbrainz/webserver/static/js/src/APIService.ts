@@ -363,14 +363,14 @@ export default class APIService {
   };
 
   checkStatsResponse = async (response: Response): Promise<void> => {
-      await this.checkStatus(response);
-      // if response code is 204, then statistics havent been calculated, send empty object
-      if (response.status === 204) {
-        const error = new APIError(`HTTP Error ${response.statusText}`);
-        error.status = response.statusText;
-        error.response = response;
-        throw error;
-      }
+    await this.checkStatus(response);
+    // if response code is 204, then statistics havent been calculated, send empty object
+    if (response.status === 204) {
+      const error = new APIError(`HTTP Error ${response.statusText}`);
+      error.status = response.statusText;
+      error.response = response;
+      throw error;
+    }
   };
 
   getUserEntity = async (
@@ -380,9 +380,6 @@ export default class APIService {
     offset: number = 0,
     count?: number
   ): Promise<UserEntityResponse> => {
-    if (!userName) {
-      return this.getSitewideEntity(entity, range, offset, count);
-    }
     let url = `${this.APIBaseURI}/stats/user/${userName}/${entity}s?offset=${offset}&range=${range}`;
     if (count !== null && count !== undefined) {
       url += `&count=${count}`;
