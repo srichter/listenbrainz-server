@@ -37,7 +37,7 @@ class ListensDispatcher(threading.Thread):
             NowPlayingListen(
                 user_id=listen["user_id"],
                 user_name=listen["user_name"],
-                data=listen["data"]
+                data=listen["track_metadata"]
             ).to_api() for listen in ujson.loads(body)]
         self.send_listens(listens, LISTEN_TYPE_PLAYING_NOW)
         channel.basic_ack(delivery_tag=method.delivery_tag)
