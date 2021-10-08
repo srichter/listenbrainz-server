@@ -34,6 +34,7 @@ class ListensDispatcher(threading.Thread):
 
     def callback_playing_now(self, channel, method, properties, body):
         data = ujson.loads(body)
+        current_app.logger.error(data)
         listen = NowPlayingListen(user_id=data["user_id"], user_name=data["user_name"], data=data["data"])
         self.send_listens([listen.to_api()], LISTEN_TYPE_PLAYING_NOW)
         channel.basic_ack(delivery_tag=method.delivery_tag)
