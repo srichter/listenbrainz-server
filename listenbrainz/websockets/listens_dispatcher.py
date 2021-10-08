@@ -33,10 +33,13 @@ class ListensDispatcher(threading.Thread):
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
     def callback_playing_now(self, channel, method, properties, body):
-        data = ujson.loads(body)
-        current_app.logger.error(data)
-        listen = NowPlayingListen(user_id=data["user_id"], user_name=data["user_name"], data=data["data"])
-        self.send_listens([listen.to_api()], LISTEN_TYPE_PLAYING_NOW)
+        listens = [
+            NowPlayingListen(
+                user_id=listen["user_id"],
+                user_name=listen["user_name"],
+                data=listen["data"]
+            ).to_api() for listen in ujson.loads(body)]
+        self.send_listens(listens, LISTEN_TYPE_PLAYING_NOW)
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
     def create_and_bind_exchange_and_queue(self, channel, exchange, queue):
