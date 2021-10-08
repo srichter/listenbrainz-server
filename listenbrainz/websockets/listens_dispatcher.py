@@ -3,6 +3,9 @@ import pika
 import time
 import threading
 
+import ujson
+
+from listenbrainz.listen import Listen, NowPlayingListen
 from listenbrainz.utils import get_fallback_connection_name
 
 from flask import current_app
@@ -25,13 +28,14 @@ class ListensDispatcher(threading.Thread):
             self.socketio.emit(event_name, json.dumps(listen), to=listen['user_name'])
 
     def callback_listen(self, channel, method, properties, body):
-        listens = json.loads(body)
+        listens = [Listen.from_json(listen).to_api() for listen in ujson.loads(body)]
         self.send_listens(listens, LISTEN_TYPE_IMPORT)
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
     def callback_playing_now(self, channel, method, properties, body):
-        listens = json.loads(body)
-        self.send_listens(listens, LISTEN_TYPE_PLAYING_NOW)
+        data = ujson.loads(body)
+        listen = NowPlayingListen(user_id=data["user_id"], user_name=data["user_name"], data=data["data"])
+        self.send_listens([listen.data], LISTEN_TYPE_PLAYING_NOW)
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
     def create_and_bind_exchange_and_queue(self, channel, exchange, queue):
