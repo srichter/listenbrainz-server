@@ -29,7 +29,8 @@ from listenbrainz.db import DUMP_DEFAULT_THREAD_COUNT
 from listenbrainz.db.dump import SchemaMismatchException
 from listenbrainz.listen import Listen
 from listenbrainz.listenstore import ListenStore
-from listenbrainz.listenstore import ORDER_ASC, ORDER_TEXT, LISTENS_DUMP_SCHEMA_VERSION
+from listenbrainz.listenstore import ORDER_ASC, ORDER_TEXT, LISTENS_DUMP_SCHEMA_VERSION, \
+    ORDER_DESC, DEFAULT_LISTENS_PER_FETCH
 from listenbrainz.utils import create_path, init_cache
 from listenbrainz import config
 
@@ -290,7 +291,7 @@ class TimescaleListenStore(ListenStore):
 
         return inserted_rows
 
-    def fetch_listens_from_storage(self, user_name, from_ts, to_ts, limit, order):
+    def fetch_listens(self, user_name, from_ts=None, to_ts=None, limit=DEFAULT_LISTENS_PER_FETCH, order=None):
         """ The timestamps are stored as UTC in the postgres datebase while on retrieving
             the value they are converted to the local server's timezone. So to compare
             datetime object we need to create a object in the same timezone as the server.
@@ -301,8 +302,19 @@ class TimescaleListenStore(ListenStore):
             from_ts: seconds since epoch, in float
             to_ts: seconds since epoch, in float
             limit: the maximum number of items to return
-            order: 0 for ASCending order, 1 for DESCending order
+            order: 0 for ASCending order, 1 for DESCending order.
+                further, if order is None:
+                    1) from_ts is not None then ASCending order is used
+                    2) otherwise DESCending order is used.
         """
+        if from_ts and to_ts and from_ts >= to_ts:
+            raise ValueError("from_ts should be less than to_ts")
+
+        if order is None:
+            if from_ts:
+                order = ORDER_ASC
+            else:
+                order = ORDER_DESC
 
         return self.fetch_listens_for_multiple_users_from_storage([user_name], from_ts, to_ts, limit, order)
 
